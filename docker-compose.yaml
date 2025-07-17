@@ -1,0 +1,25 @@
+services:
+  kafka:
+    image: apache/kafka:latest # Or a specific version like 'apache/kafka:3.7.0'
+    container_name: kafka
+    ports:
+      - "9092:9092" # Port for external clients (your Go app)
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092 # How external clients connect
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1 # For single-node setup, use 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0 # For faster consumer group rebalancing
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1 # For single-node setup, use 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1 # For single-node setup, use 1
+      # Optional: for persistent data
+      # KAFKA_LOG_DIRS: /kafka/logs
+    volumes:
+      - kafka_data:/kafka/logs # Persist Kafka data
+    restart: unless-stopped
+
+volumes:
+  kafka_data:
